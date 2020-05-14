@@ -20,12 +20,17 @@ public class SensorDAO extends SqlDAO
         {
             connect();
             PreparedStatement statement = prepareStatement(
-                    "insert into " + sensorType.toString() + "(Value, Created)" +
-                            "values(?, ?)"
+                   "declare @cityName nvarchar(50) = ?;" +
+                        "declare @cityId int;" +
+                        "if not exists (select 1 from City where Name = @cityName)" +
+                        "   insert into City(Name) values(@cityName);" +
+                        "select @cityId = Id from City where Name = @cityName;" +
+                        "insert into " + sensorType + "(Value, Created, CityId) values(?, ?, @cityId);"
             );
 
-            statement.setFloat(1, entry.getValue());
-            statement.setTimestamp(2, entry.getCreated());
+            statement.setString(1, entry.getCity());
+            statement.setFloat(2, entry.getValue());
+            statement.setTimestamp(3, entry.getCreated());
             statement.executeUpdate();
         }
         finally
@@ -34,16 +39,23 @@ public class SensorDAO extends SqlDAO
         }
     }
 
-    public List<SensorLogEntry> getLogEntry(SensorType sensorType) throws SQLException
+    public List<SensorLogEntry> getLogEntry(SensorType sensorType, int count) throws SQLException
     {
         try
         {
             connect();
-            ResultSet rs = executeQuery("select * from " + sensorType);
+            PreparedStatement statement = prepareStatement(
+                    "select top(?) sensor.Value, sensor.Created, city.Name as CityName " +
+                            "from " + sensorType + " sensor " +
+                            "join City on City.Id = sensor.CityId " +
+                            "order by sensor.created desc"
+                    );
+            statement.setInt(1, count);
+            ResultSet rs = statement.executeQuery();
+
             ArrayList<SensorLogEntry> entries = new ArrayList<>();
             while (rs.next())
-                entries.add(
-                        new SensorLogEntry(rs.getFloat("Value"), rs.getTimestamp("Created")));
+                entries.add(new SensorLogEntry(rs.getFloat("Value"), rs.getTimestamp("Created"), rs.getString("CityName")));
             return entries;
         }
         finally
