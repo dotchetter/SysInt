@@ -17,7 +17,7 @@ public class Main {
         dao.createLogEntry(SensorType.HUMIDITY, new SensorLogEntry(50, new Timestamp(Instant.now().toEpochMilli()), "Uppsala"));
 
         //Get log entries
-        List<SensorLogEntry> entries = dao.getLogEntry(SensorType.HUMIDITY, 5);
+        List<SensorLogEntry> entries = dao.getLogEntries(SensorType.HUMIDITY, 5);
         for (SensorLogEntry entry : entries)
         {
             System.out.println(entry.getValue());

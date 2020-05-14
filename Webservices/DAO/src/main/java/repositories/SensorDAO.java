@@ -39,7 +39,7 @@ public class SensorDAO extends SqlDAO
         }
     }
 
-    public List<SensorLogEntry> getLogEntry(SensorType sensorType, int count) throws SQLException
+    public List<SensorLogEntry> getLogEntries(SensorType sensorType, int count) throws SQLException
     {
         try
         {
