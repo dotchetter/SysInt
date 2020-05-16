@@ -38,7 +38,7 @@ bool newMessage = false;
 
 void setup() {
     
-    Serial.begin(115200);
+    Serial.begin(9600);
     dht.begin();
     driver.init();
     pinMode(8, OUTPUT);
@@ -53,11 +53,13 @@ void sendTelemetryDataToServer() {
     data_struct.light = (LIGHT_SENSOR_MAX - analogRead(LIGHT_PIN));
     data_struct.light = (data_struct.light / (LIGHT_SENSOR_MAX / 100));
 
+    output += "<";
     output += data_struct.temperature;
     output += ";";
     output += data_struct.humidity;
     output += ";";
     output += data_struct.light;
+    output += ">";
     
     Serial.println(output);
 }
