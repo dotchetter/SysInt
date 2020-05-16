@@ -10,7 +10,7 @@ import java.util.List;
 
 public class SensorDAO extends SqlDAO
 {
-    public SensorDAO() throws ClassNotFoundException, IOException
+    public SensorDAO() throws IOException
     {
     }
 

@@ -6,8 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="DAO" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="DAO" target="14" />
+    </bytecodeTargetLevel>
   </component>
 </project>

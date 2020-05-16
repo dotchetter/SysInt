@@ -10,7 +10,7 @@ abstract public class SqlDAO
     private Properties properties = new Properties();
     private Connection connection;
 
-    public SqlDAO() throws ClassNotFoundException, IOException
+    public SqlDAO() throws IOException
     {
         try (FileInputStream stream = new FileInputStream("db.properties"))
         {
