@@ -20,6 +20,7 @@ public class SensorsRealTime
 {
     Session session = null;
     SensorDAO sensorDAO = new SensorDAO();
+    Timer timer = new Timer();
 
     public SensorsRealTime() throws IOException
     {
@@ -44,7 +45,6 @@ public class SensorsRealTime
                 }
             }
         };
-        Timer timer = new Timer();
         timer.scheduleAtFixedRate(timerTask, 0, 1000);
     }
 
@@ -60,6 +60,6 @@ public class SensorsRealTime
     @OnClose
     public void onClose(Session session)
     {
-
+        timer.cancel();
     }
 }
