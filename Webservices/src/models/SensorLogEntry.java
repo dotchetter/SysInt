@@ -8,9 +8,9 @@ public class SensorLogEntry
     private Timestamp created;
     private String city;
 
-    public SensorLogEntry(float temperature, Timestamp created, String city)
+    public SensorLogEntry(float value, Timestamp created, String city)
     {
-        this.value = temperature;
+        this.value = value;
         this.created = created;
         this.city = city;
     }
