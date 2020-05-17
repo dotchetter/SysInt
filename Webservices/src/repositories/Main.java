@@ -14,7 +14,7 @@ public class Main {
         SensorDAO dao = new SensorDAO();
 
         //Create log entry
-        dao.createLogEntry(SensorType.HUMIDITY, new SensorLogEntry(50, new Timestamp(Instant.now().toEpochMilli()), "Uppsala"));
+        dao.createLogEntry(new SensorLogEntry(50, new Timestamp(Instant.now().toEpochMilli()), "Uppsala", SensorType.HUMIDITY));
 
         //Get log entries
         List<SensorLogEntry> entries = dao.getLogEntries(SensorType.HUMIDITY, 5);

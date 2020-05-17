@@ -1,5 +1,7 @@
 package models;
 
+import repositories.SensorType;
+
 import java.sql.Timestamp;
 
 public class SensorLogEntry
@@ -7,12 +9,14 @@ public class SensorLogEntry
     private float value;
     private Timestamp created;
     private String city;
+    private SensorType sensorType;
 
-    public SensorLogEntry(float value, Timestamp created, String city)
+    public SensorLogEntry(float value, Timestamp created, String city, SensorType sensorType)
     {
         this.value = value;
         this.created = created;
         this.city = city;
+        this.sensorType = sensorType;
     }
 
     public float getValue()
@@ -43,5 +47,15 @@ public class SensorLogEntry
     public void setCity(String city)
     {
         this.city = city;
+    }
+
+    public SensorType getSensorType()
+    {
+        return sensorType;
+    }
+
+    public void setSensorType(SensorType sensorType)
+    {
+        this.sensorType = sensorType;
     }
 }

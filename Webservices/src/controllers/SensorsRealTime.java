@@ -1,19 +1,17 @@
-//import models.SensorLogEntry;
-//import repositories.SensorDAO;
-//import repositories.SensorType;
+package controllers;
+import com.google.gson.Gson;
 import models.SensorLogEntry;
 import repositories.SensorDAO;
 import repositories.SensorType;
-
 import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 @ServerEndpoint("/SensorsRealTime")
 public class SensorsRealTime
@@ -52,8 +50,12 @@ public class SensorsRealTime
     {
         if (session != null)
         {
-            SensorLogEntry currentHumidity = sensorDAO.getLogEntries(SensorType.HUMIDITY, 1).get(0);
-            session.getBasicRemote().sendText(Instant.now().toString() + "\nHumidity" + currentHumidity.getValue());
+            var timestamp = new Timestamp(Instant.now().toEpochMilli());
+            List<SensorLogEntry> sensorList = new ArrayList<>();
+            sensorList.add(new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala", SensorType.TEMPERATURE));
+            sensorList.add(new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala", SensorType.HUMIDITY));
+            sensorList.add(new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala", SensorType.LUMEN));
+            session.getBasicRemote().sendText(new Gson().toJson(sensorList));
         }
     }
 
