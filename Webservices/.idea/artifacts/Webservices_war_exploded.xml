@@ -7,6 +7,9 @@
         <element id="directory" name="classes">
           <element id="module-output" name="Webservices" />
         </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="jSerialComm-2.6.2" />
+        </element>
       </element>
     </root>
   </artifact>
