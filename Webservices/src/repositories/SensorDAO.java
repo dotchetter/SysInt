@@ -14,7 +14,7 @@ public class SensorDAO extends SqlDAO
     {
     }
 
-    public void createLogEntry(SensorType sensorType, SensorLogEntry entry) throws SQLException
+    public void createLogEntry(SensorLogEntry entry) throws SQLException
     {
         try
         {
@@ -25,7 +25,7 @@ public class SensorDAO extends SqlDAO
                         "if not exists (select 1 from City where Name = @cityName)" +
                         "   insert into City(Name) values(@cityName);" +
                         "select @cityId = Id from City where Name = @cityName;" +
-                        "insert into " + sensorType + "(Value, Created, CityId) values(?, ?, @cityId);"
+                        "insert into " + entry.getSensorType() + "(Value, Created, CityId) values(?, ?, @cityId);"
             );
 
             statement.setString(1, entry.getCity());
@@ -55,7 +55,7 @@ public class SensorDAO extends SqlDAO
 
             ArrayList<SensorLogEntry> entries = new ArrayList<>();
             while (rs.next())
-                entries.add(new SensorLogEntry(rs.getFloat("Value"), rs.getTimestamp("Created"), rs.getString("CityName")));
+                entries.add(new SensorLogEntry(rs.getFloat("Value"), rs.getTimestamp("Created"), rs.getString("CityName"), sensorType));
             return entries;
         }
         finally
