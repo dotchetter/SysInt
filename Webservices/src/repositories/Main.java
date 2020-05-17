@@ -1,10 +1,10 @@
 package repositories;
 
+import models.SensorLog;
 import models.SensorLogEntry;
 import java.io.IOException;
 import java.sql.*;
 import java.time.Instant;
-import java.util.List;
 
 public class Main {
 
@@ -14,11 +14,11 @@ public class Main {
         SensorDAO dao = new SensorDAO();
 
         //Create log entry
-        dao.createLogEntry(new SensorLogEntry(50, new Timestamp(Instant.now().toEpochMilli()), "Uppsala", SensorType.HUMIDITY));
+        dao.createLogEntry(SensorType.HUMIDITY, new SensorLogEntry(50, new Timestamp(Instant.now().toEpochMilli()), "Uppsala"));
 
         //Get log entries
-        List<SensorLogEntry> entries = dao.getLogEntries(SensorType.HUMIDITY, 5);
-        for (SensorLogEntry entry : entries)
+        SensorLog log = dao.getLog(SensorType.HUMIDITY, 5);
+        for (SensorLogEntry entry : log.getEntries())
         {
             System.out.println(entry.getValue());
             System.out.println(entry.getCreated());

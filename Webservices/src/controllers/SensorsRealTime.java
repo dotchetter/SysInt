@@ -1,7 +1,7 @@
 package controllers;
 import com.google.gson.Gson;
+import models.SensorLog;
 import models.SensorLogEntry;
-import repositories.SensorDAO;
 import repositories.SensorType;
 import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
@@ -17,7 +17,6 @@ import java.util.*;
 public class SensorsRealTime
 {
     Session session = null;
-    SensorDAO sensorDAO = new SensorDAO();
     Timer timer = new Timer();
 
     public SensorsRealTime() throws IOException
@@ -48,16 +47,13 @@ public class SensorsRealTime
 
     public void sendData() throws IOException, SQLException
     {
-        if (session != null)
-        {
-            var timestamp = new Timestamp(Instant.now().toEpochMilli());
-            List<SensorLogEntry> sensorList = new ArrayList<>();
-            sensorList.add(new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala", SensorType.TEMPERATURE));
-            sensorList.add(new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala", SensorType.HUMIDITY));
-            sensorList.add(new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala", SensorType.LUMEN));
-            session.getBasicRemote().sendText(new Gson().toJson(sensorList));
-        }
-    }
+        var timestamp = new Timestamp(Instant.now().toEpochMilli());
+        List<SensorLog> sensors = new ArrayList<>();
+        sensors.add(new SensorLog(SensorType.TEMPERATURE, new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala")));
+        sensors.add(new SensorLog(SensorType.HUMIDITY, new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala")));
+        sensors.add(new SensorLog(SensorType.LUMEN, new SensorLogEntry(new Random().nextFloat()*100, timestamp, "Uppsala")));
+        session.getBasicRemote().sendText(new Gson().toJson(sensors));
+     }
 
     @OnClose
     public void onClose(Session session)
