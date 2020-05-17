@@ -10,13 +10,14 @@ public class Communicator {
     public Communicator(){}
 
     public void readSerial() throws IOException {
+        int choice;
+        int i = 1;
+
         SerialPort ports[] = SerialPort.getCommPorts();
         System.out.println("Select a port: ");
         String input = new String();
         Scanner scanner = new Scanner(System.in);
-        int choice;
 
-        int i = 1;
         for(SerialPort port : ports){
             System.out.println(i + "*" + port.getSystemPortName());
             i++;
@@ -24,12 +25,14 @@ public class Communicator {
 
         choice = scanner.nextInt();
         SerialPort port = ports[choice - 1];
+
         if (port.openPort()){
             System.out.println("Succesfully opened port: " + port.getSystemPortName());
         } else {
             System.out.println("Could not open port....");
             return;
         }
+
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
         InputStream in = null;
 
@@ -42,6 +45,7 @@ public class Communicator {
             e.printStackTrace();
             in.close();
         }
+
         port.closePort();
     }
 
