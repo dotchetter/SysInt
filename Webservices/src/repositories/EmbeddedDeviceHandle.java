@@ -11,18 +11,16 @@ public class EmbeddedDeviceHandle implements Runnable {
 
     public void run() {
 
-        /*
-        * Act as a handle between local embedded device equipped with sensors,
-        * and provide callers / instantiators of this class with data from the
-        * device. */
-
-        InputStream in = null;
-        SerialPort chosenPort = null;
         SerialPort ports[] = SerialPort.getCommPorts();
+        String input = new String();
+        Scanner scanner = new Scanner(System.in);
+        String inBuf = new String();
+
+        SerialPort chosenPort = null;
 
         for (SerialPort p : ports)  {
             if (p.openPort()){
-                System.out.println("Opened port: " + p.getSystemPortName());
+                System.out.println("Succesfully opened port: " + p.getSystemPortName());
                 chosenPort = p;
             }
         }
@@ -33,22 +31,25 @@ public class EmbeddedDeviceHandle implements Runnable {
         }
 
         chosenPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+        InputStream in = null;
 
-        while (true) {
+        try {
+            in = chosenPort.getInputStream();
+            while(true) {
+                inBuf += (char)in.read();
+                if (inBuf.contains(">")) {
+                    System.out.println(inBuf);
+                    inBuf = "";
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             try {
-                in = chosenPort.getInputStream();
-                while(true) {
-                    System.out.print((char) in.read());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                try {
-                    in.close();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-                chosenPort.closePort();
+                in.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
             }
         }
+        chosenPort.closePort();
     }
 }
