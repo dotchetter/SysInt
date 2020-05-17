@@ -1,11 +1,8 @@
-//import models.SensorLogEntry;
-//import repositories.SensorDAO;
-//import repositories.SensorType;
+package controllers;
 import com.google.gson.Gson;
 import models.SensorLogEntry;
 import repositories.SensorDAO;
 import repositories.SensorType;
-
 import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
