@@ -3,6 +3,7 @@ package controllers;
 import com.google.gson.Gson;
 import models.SensorLog;
 import repositories.SensorDAO;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +27,7 @@ public class SensorsDb extends HttpServlet
             e.printStackTrace();
             return;
         }
+        setAccessControlHeaders(response);
         response.setContentType("application/json");
         var writer = response.getWriter();
         List<SensorLog> sensorLogs = null;
@@ -40,5 +42,19 @@ public class SensorsDb extends HttpServlet
 
         writer.print(new Gson().toJson(sensorLogs));
         writer.flush();
+    }
+
+    //for Preflight
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
+    {
+        setAccessControlHeaders(resp);
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void setAccessControlHeaders(HttpServletResponse resp)
+    {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setHeader("Access-Control-Allow-Methods", "GET");
     }
 }
