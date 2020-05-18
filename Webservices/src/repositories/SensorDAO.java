@@ -16,6 +16,12 @@ public class SensorDAO extends SqlDAO
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
     }
 
+    public void createLogEntries(SensorLog log) throws SQLException
+    {
+        for (var entry : log.getEntries())
+            createLogEntry(log.getSensorType(), entry);
+    }
+
     public void createLogEntry(SensorType sensorType, SensorLogEntry entry) throws SQLException
     {
         try

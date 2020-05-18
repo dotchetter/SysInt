@@ -1,6 +1,7 @@
 package controllers;
 import com.google.gson.Gson;
 import repositories.EmbeddedDeviceHandle;
+import repositories.SensorDAO;
 import repositories.StaticDeviceMessageQueue;
 
 import javax.websocket.OnClose;
@@ -14,12 +15,13 @@ import java.util.*;
 @ServerEndpoint("/SensorsRealTime")
 public class SensorsRealTime
 {
+    SensorDAO sensorDao = new SensorDAO();
     Session session = null;
     Timer timer = new Timer();
     private static Thread threadForDeviceHandle = null;
     private static EmbeddedDeviceHandle deviceHandle = new EmbeddedDeviceHandle("Stockholm");
 
-    public SensorsRealTime()
+    public SensorsRealTime() throws IOException, ClassNotFoundException
     {
     }
 
@@ -56,9 +58,12 @@ public class SensorsRealTime
             threadForDeviceHandle.start();
         }
 
-        var entry = StaticDeviceMessageQueue.dequeue();
-        if (entry != null)
-            session.getBasicRemote().sendText(new Gson().toJson(entry));
+        var sensorLog = StaticDeviceMessageQueue.dequeue();
+        if (sensorLog != null)
+        {
+            session.getBasicRemote().sendText(new Gson().toJson(sensorLog));
+            sensorDao.createLogEntries(sensorLog);
+        }
     }
 
     @OnClose
