@@ -4,7 +4,7 @@ import models.SensorLogEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-class StaticDeviceMessageQueue {
+public class StaticDeviceMessageQueue {
 
     private static Queue<SensorLogEntry> logQueue = new LinkedList<>();
 
@@ -19,10 +19,5 @@ class StaticDeviceMessageQueue {
 
     public static SensorLogEntry dequeue() {
         return logQueue.poll();
-    }
-}
-
-class testQueue {
-    public static void main(String[] args) {
     }
 }
