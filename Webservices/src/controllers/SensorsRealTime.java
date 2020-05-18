@@ -8,6 +8,8 @@ import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -19,15 +21,38 @@ public class SensorsRealTime
     Session session = null;
     Timer timer = new Timer();
     private static Thread threadForDeviceHandle = null;
-    private static EmbeddedDeviceHandle deviceHandle = new EmbeddedDeviceHandle("Stockholm");
+    private static EmbeddedDeviceHandle deviceHandle = null;
+    private static Properties properties = null;
 
     public SensorsRealTime() throws IOException, ClassNotFoundException
     {
+
     }
 
     @OnOpen
-    public void onOpen(Session session)
+    public synchronized void onOpen(Session session)
     {
+        if (properties == null)
+        {
+            try (var stream = new FileInputStream("db.properties"))
+            {
+                properties = new Properties();
+                properties.load(stream);
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+                return;
+            }
+        }
+        if (deviceHandle == null) {
+            deviceHandle = new EmbeddedDeviceHandle(properties.getProperty("city"));
+        }
+
+        if (threadForDeviceHandle == null) {
+            threadForDeviceHandle = new Thread(deviceHandle);
+            threadForDeviceHandle.start();
+        }
+
         this.session = session;
 
         TimerTask timerTask = new TimerTask()
@@ -49,15 +74,6 @@ public class SensorsRealTime
 
     public synchronized void sendData() throws IOException, SQLException
     {
-        if (deviceHandle == null) {
-            deviceHandle = new EmbeddedDeviceHandle("Stockholm");
-        }
-
-        if (threadForDeviceHandle == null) {
-            threadForDeviceHandle = new Thread(deviceHandle);
-            threadForDeviceHandle.start();
-        }
-
         var sensorLog = StaticDeviceMessageQueue.dequeue();
         if (sensorLog != null)
         {
