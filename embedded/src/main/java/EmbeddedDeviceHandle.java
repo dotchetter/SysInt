@@ -14,7 +14,7 @@ public class EmbeddedDeviceHandle implements Runnable {
         SerialPort ports[] = SerialPort.getCommPorts();
         String input = new String();
         Scanner scanner = new Scanner(System.in);
-
+        String inBuf = new String();
 
         SerialPort chosenPort = null;
 
@@ -36,23 +36,20 @@ public class EmbeddedDeviceHandle implements Runnable {
         try {
             in = chosenPort.getInputStream();
             while(true) {
-                System.out.print((char) in.read());
+                inBuf += (char)in.read();
+                if (inBuf.contains(">")) {
+                    System.out.println(inBuf);
+                    inBuf = "";
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            in.close();
-        }
-        chosenPort.closePort();
-    }
-
-    public static void main(String[] args) {
-        EmbeddedDeviceHandle c = new EmbeddedDeviceHandle();
-        while (true) {
             try {
-                c.readSerial();
-            } catch (IOException e) {
-                e.printStackTrace();
+                in.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
             }
         }
+        chosenPort.closePort();
     }
 }
