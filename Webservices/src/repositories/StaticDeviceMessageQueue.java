@@ -1,14 +1,15 @@
 package repositories;
 
+import models.SensorLog;
 import models.SensorLogEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class StaticDeviceMessageQueue {
 
-    private static Queue<SensorLogEntry> logQueue = new LinkedList<>();
+    private static Queue<SensorLog> logQueue = new LinkedList<>();
 
-    public static void enqueue(SensorLogEntry logEntry) {
+    public static void enqueue(SensorLog logEntry) {
         try {
             logQueue.add(logEntry);
         } catch (Exception e) {
@@ -17,7 +18,7 @@ public class StaticDeviceMessageQueue {
         }
     }
 
-    public static SensorLogEntry dequeue() {
+    public static SensorLog dequeue() {
         return logQueue.poll();
     }
 }

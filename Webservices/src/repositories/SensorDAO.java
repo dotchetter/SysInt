@@ -1,5 +1,6 @@
 package repositories;
 
+import models.SensorLog;
 import models.SensorLogEntry;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -10,11 +11,18 @@ import java.util.List;
 
 public class SensorDAO extends SqlDAO
 {
-    public SensorDAO() throws IOException
+    public SensorDAO() throws IOException, ClassNotFoundException
     {
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
     }
 
-    public void createLogEntry(SensorLogEntry entry) throws SQLException
+    public void createLogEntries(SensorLog log) throws SQLException
+    {
+        for (var entry : log.getEntries())
+            createLogEntry(log.getSensorType(), entry);
+    }
+
+    public void createLogEntry(SensorType sensorType, SensorLogEntry entry) throws SQLException
     {
         try
         {
@@ -25,7 +33,7 @@ public class SensorDAO extends SqlDAO
                         "if not exists (select 1 from City where Name = @cityName)" +
                         "   insert into City(Name) values(@cityName);" +
                         "select @cityId = Id from City where Name = @cityName;" +
-                        "insert into " + entry.getSensorType() + "(Value, Created, CityId) values(?, ?, @cityId);"
+                        "insert into " + sensorType + "(Value, Created, CityId) values(?, ?, @cityId);"
             );
 
             statement.setString(1, entry.getCity());
@@ -39,7 +47,7 @@ public class SensorDAO extends SqlDAO
         }
     }
 
-    public List<SensorLogEntry> getLogEntries(SensorType sensorType, int count) throws SQLException
+    public SensorLog getLog(SensorType sensorType, int entryCount) throws SQLException
     {
         try
         {
@@ -50,13 +58,14 @@ public class SensorDAO extends SqlDAO
                             "join City on City.Id = sensor.CityId " +
                             "order by sensor.created desc"
                     );
-            statement.setInt(1, count);
+            statement.setInt(1, entryCount);
             ResultSet rs = statement.executeQuery();
 
             ArrayList<SensorLogEntry> entries = new ArrayList<>();
             while (rs.next())
-                entries.add(new SensorLogEntry(rs.getFloat("Value"), rs.getTimestamp("Created"), rs.getString("CityName"), sensorType));
-            return entries;
+                entries.add(new SensorLogEntry(rs.getFloat("Value"), rs.getTimestamp("Created"), rs.getString("CityName")));
+
+            return new SensorLog(sensorType, entries);
         }
         finally
         {
@@ -64,4 +73,11 @@ public class SensorDAO extends SqlDAO
         }
     }
 
+    public List<SensorLog> getAllLogs(int entryCount) throws SQLException
+    {
+        var logs = new ArrayList<SensorLog>();
+        for (var sensorType : SensorType.values())
+            logs.add(getLog(sensorType, entryCount));
+        return logs;
+    }
 }

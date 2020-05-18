@@ -40,8 +40,8 @@ void setup() {
     
     Serial.begin(9600);
     dht.begin();
-    driver.init();
-    pinMode(8, OUTPUT);
+    //driver.init();
+    //pinMode(8, OUTPUT);
     data_struct.auth = COMMS_KEY;
 }
 

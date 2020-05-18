@@ -1,6 +1,5 @@
 package repositories;
 import com.fazecast.jSerialComm.SerialPort;
-import com.sun.source.tree.UsesTree;
 import models.SensorLogEntry;
 
 import java.io.IOException;
@@ -58,10 +57,10 @@ public class EmbeddedDeviceHandle implements Runnable {
                     Float humid = Float.valueOf(splitMsgbuf[1]);
                     Float light = Float.valueOf(splitMsgbuf[2]);
 
-                    Timestamp time = new Timestamp(Instant.now().toEpochMilli());
-                    SensorLogEntry tempEntry = new SensorLogEntry(temp, time, this.deviceLocation, SensorType.TEMPERATURE);
-                    SensorLogEntry humidEntry = new SensorLogEntry(humid, time, this.deviceLocation, SensorType.HUMIDITY);
-                    SensorLogEntry lightEntry = new SensorLogEntry(light, time, this.deviceLocation, SensorType.LUMEN);
+                        Timestamp time = new Timestamp(Instant.now().toEpochMilli());
+                        SensorLog tempEntry = new SensorLog(SensorType.TEMPERATURE, new SensorLogEntry(temp, time, this.deviceLocation));
+                        SensorLog humidEntry = new SensorLog(SensorType.HUMIDITY, new SensorLogEntry(humid, time, this.deviceLocation));
+                        SensorLog lightEntry = new SensorLog(SensorType.LUMEN, new SensorLogEntry(light, time, this.deviceLocation));
 
                     StaticDeviceMessageQueue.enqueue(tempEntry);
                     StaticDeviceMessageQueue.enqueue(humidEntry);

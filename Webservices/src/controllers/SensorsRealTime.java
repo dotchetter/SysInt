@@ -1,9 +1,7 @@
 package controllers;
 import com.google.gson.Gson;
-import models.SensorLogEntry;
 import repositories.EmbeddedDeviceHandle;
 import repositories.SensorDAO;
-import repositories.SensorType;
 import repositories.StaticDeviceMessageQueue;
 
 import javax.websocket.OnClose;
@@ -12,21 +10,18 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.*;
 
 @ServerEndpoint("/SensorsRealTime")
 public class SensorsRealTime
 {
+    SensorDAO sensorDao = new SensorDAO();
     Session session = null;
-    SensorDAO sensorDAO = new SensorDAO();
     Timer timer = new Timer();
     private static Thread threadForDeviceHandle = null;
     private static EmbeddedDeviceHandle deviceHandle = new EmbeddedDeviceHandle("Stockholm");
-    private static SensorLogEntry latestEntry = null;
 
-    public SensorsRealTime() throws IOException
+    public SensorsRealTime() throws IOException, ClassNotFoundException
     {
     }
 
@@ -63,24 +58,11 @@ public class SensorsRealTime
             threadForDeviceHandle.start();
         }
 
-        var entry = StaticDeviceMessageQueue.dequeue();
-
-        if (latestEntry == null) {
-            latestEntry = StaticDeviceMessageQueue.dequeue();
-            session.getBasicRemote().sendText(new Gson().toJson("No messages received from sensor since start."));
-        }
-
-        if (session != null && entry != null) {
-            var timestamp = new Timestamp(Instant.now().toEpochMilli());
-            List<SensorLogEntry> sensorList = new ArrayList<>();
-            sensorList.add(latestEntry);
-            SensorLogEntry newLogEntry = StaticDeviceMessageQueue.dequeue();
-
-            if (newLogEntry != null) {
-                latestEntry = newLogEntry;
-            }
-
-            session.getBasicRemote().sendText(new Gson().toJson(sensorList));
+        var sensorLog = StaticDeviceMessageQueue.dequeue();
+        if (sensorLog != null)
+        {
+            session.getBasicRemote().sendText(new Gson().toJson(sensorLog));
+            sensorDao.createLogEntries(sensorLog);
         }
     }
 
