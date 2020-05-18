@@ -1,12 +1,12 @@
 package repositories;
 import com.fazecast.jSerialComm.SerialPort;
+import com.sun.source.tree.UsesTree;
 import models.SensorLogEntry;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Scanner;
 
 public class EmbeddedDeviceHandle implements Runnable {
     String deviceLocation;
@@ -18,8 +18,6 @@ public class EmbeddedDeviceHandle implements Runnable {
     public void run() {
 
         SerialPort ports[] = SerialPort.getCommPorts();
-        String input = new String();
-        Scanner scanner = new Scanner(System.in);
         String inBuf = new String();
         String[] splitMsgbuf;
 
@@ -39,6 +37,7 @@ public class EmbeddedDeviceHandle implements Runnable {
         }
 
         chosenPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+        chosenPort.setBaudRate(9600);
         InputStream in = null;
 
         try {
@@ -46,31 +45,31 @@ public class EmbeddedDeviceHandle implements Runnable {
             while(true) {
                 inBuf += (char)in.read();
                 inBuf.strip().replace(" ", "").replace("\n","");
-                if (!inBuf.contains("<") && !inBuf.contains(">")) {
+                if (!inBuf.contains("<") || !inBuf.contains(">")) {
                     continue;
                 }
-
+                System.out.println(inBuf);
                 splitMsgbuf = inBuf.replace("<", "")
                         .replace(">", "")
                         .strip().split(";");
 
-                for (SensorType iterativeSensorType : SensorType.values()) {
-                    try {
-                        Float temp = Float.valueOf(splitMsgbuf[0]);
-                        Float humid = Float.valueOf(splitMsgbuf[1]);
-                        Float light = Float.valueOf(splitMsgbuf[2]);
+                try {
+                    Float temp = Float.valueOf(splitMsgbuf[0]);
+                    Float humid = Float.valueOf(splitMsgbuf[1]);
+                    Float light = Float.valueOf(splitMsgbuf[2]);
 
-                        Timestamp time = new Timestamp(Instant.now().toEpochMilli());
-                        SensorLogEntry tempEntry = new SensorLogEntry(temp, time, this.deviceLocation, SensorType.TEMPERATURE);
-                        SensorLogEntry humidEntry = new SensorLogEntry(humid, time, this.deviceLocation, SensorType.HUMIDITY);
-                        SensorLogEntry lightEntry = new SensorLogEntry(light, time, this.deviceLocation, SensorType.LUMEN);
+                    Timestamp time = new Timestamp(Instant.now().toEpochMilli());
+                    SensorLogEntry tempEntry = new SensorLogEntry(temp, time, this.deviceLocation, SensorType.TEMPERATURE);
+                    SensorLogEntry humidEntry = new SensorLogEntry(humid, time, this.deviceLocation, SensorType.HUMIDITY);
+                    SensorLogEntry lightEntry = new SensorLogEntry(light, time, this.deviceLocation, SensorType.LUMEN);
 
-                        StaticDeviceMessageQueue.enqueue(tempEntry);
-                        StaticDeviceMessageQueue.enqueue(humidEntry);
-                        StaticDeviceMessageQueue.enqueue(lightEntry);
-                    } catch (Exception e) {
-                        continue;
-                    }
+                    StaticDeviceMessageQueue.enqueue(tempEntry);
+                    StaticDeviceMessageQueue.enqueue(humidEntry);
+                    StaticDeviceMessageQueue.enqueue(lightEntry);
+                } catch (Exception e) {
+                    System.err.println("Could not enqueue log entries from parsed message: " + inBuf);
+                    inBuf = "";
+                    continue;
                 }
                 inBuf = "";
             }
