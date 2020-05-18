@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include <RH_ASK.h>
 
-#define DHT_PIN 7
+#define DHT_PIN 2
 #define LIGHT_PIN A0
 #define DHT_TYPE DHT11
 #define COMMS_KEY 21474

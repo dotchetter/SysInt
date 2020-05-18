@@ -1,6 +1,7 @@
 package repositories;
 import com.fazecast.jSerialComm.SerialPort;
 import models.SensorLogEntry;
+import models.SensorLog;
 
 import java.io.IOException;
 import java.io.InputStream;
