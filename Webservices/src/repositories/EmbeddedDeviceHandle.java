@@ -1,13 +1,19 @@
 package repositories;
 import com.fazecast.jSerialComm.SerialPort;
+import models.SensorLogEntry;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Scanner;
 
 public class EmbeddedDeviceHandle implements Runnable {
+    String deviceLocation;
 
-    public EmbeddedDeviceHandle(){}
+    public EmbeddedDeviceHandle(String deviceLocation){
+        this.deviceLocation = deviceLocation;
+    }
 
     public void run() {
 
@@ -15,18 +21,20 @@ public class EmbeddedDeviceHandle implements Runnable {
         String input = new String();
         Scanner scanner = new Scanner(System.in);
         String inBuf = new String();
+        String[] splitMsgbuf;
 
         SerialPort chosenPort = null;
 
         for (SerialPort p : ports)  {
             if (p.openPort()){
-                System.out.println("Succesfully opened port: " + p.getSystemPortName());
+                System.out.print("EmbeddedDeviceHandle: Succesfully opened port: " + p.getSystemPortName() + ". ");
+                System.out.println("Reading messages from device. Location: " + this.deviceLocation);
                 chosenPort = p;
             }
         }
 
         if (chosenPort == null) {
-            System.out.println("No available ports, exiting . . .");
+            System.out.println("No serial device discovered. Make sure all other access terminals are closed.");
             return;
         }
 
@@ -37,10 +45,34 @@ public class EmbeddedDeviceHandle implements Runnable {
             in = chosenPort.getInputStream();
             while(true) {
                 inBuf += (char)in.read();
-                if (inBuf.contains(">")) {
-                    System.out.println(inBuf);
-                    inBuf = "";
+                inBuf.strip().replace(" ", "").replace("\n","");
+                if (!inBuf.contains("<") && !inBuf.contains(">")) {
+                    continue;
                 }
+
+                splitMsgbuf = inBuf.replace("<", "")
+                        .replace(">", "")
+                        .strip().split(";");
+
+                for (SensorType iterativeSensorType : SensorType.values()) {
+                    try {
+                        Float temp = Float.valueOf(splitMsgbuf[0]);
+                        Float humid = Float.valueOf(splitMsgbuf[1]);
+                        Float light = Float.valueOf(splitMsgbuf[2]);
+
+                        Timestamp time = new Timestamp(Instant.now().toEpochMilli());
+                        SensorLogEntry tempEntry = new SensorLogEntry(temp, time, this.deviceLocation, SensorType.TEMPERATURE);
+                        SensorLogEntry humidEntry = new SensorLogEntry(humid, time, this.deviceLocation, SensorType.HUMIDITY);
+                        SensorLogEntry lightEntry = new SensorLogEntry(light, time, this.deviceLocation, SensorType.LUMEN);
+
+                        StaticDeviceMessageQueue.enqueue(tempEntry);
+                        StaticDeviceMessageQueue.enqueue(humidEntry);
+                        StaticDeviceMessageQueue.enqueue(lightEntry);
+                    } catch (Exception e) {
+                        continue;
+                    }
+                }
+                inBuf = "";
             }
         } catch (Exception e) {
             e.printStackTrace();
