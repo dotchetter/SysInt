@@ -1,8 +1,8 @@
 package controllers;
 import com.google.gson.Gson;
+import models.SensorLog;
 import models.SensorLogEntry;
 import repositories.EmbeddedDeviceHandle;
-import repositories.SensorDAO;
 import repositories.SensorType;
 import repositories.StaticDeviceMessageQueue;
 
@@ -20,13 +20,12 @@ import java.util.*;
 public class SensorsRealTime
 {
     Session session = null;
-    SensorDAO sensorDAO = new SensorDAO();
     Timer timer = new Timer();
     private static Thread threadForDeviceHandle = null;
     private static EmbeddedDeviceHandle deviceHandle = new EmbeddedDeviceHandle("Stockholm");
-    private static SensorLogEntry latestEntry = null;
+    //private static SensorLog latestEntry = null;
 
-    public SensorsRealTime() throws IOException
+    public SensorsRealTime()
     {
     }
 
@@ -65,22 +64,22 @@ public class SensorsRealTime
 
         var entry = StaticDeviceMessageQueue.dequeue();
 
-        if (latestEntry == null) {
-            latestEntry = StaticDeviceMessageQueue.dequeue();
-            session.getBasicRemote().sendText(new Gson().toJson("No messages received from sensor since start."));
-        }
+        //if (latestEntry == null) {
+          //  latestEntry = StaticDeviceMessageQueue.dequeue();
+            //session.getBasicRemote().sendText(new Gson().toJson("No messages received from sensor since start."));
+        //}
 
-        if (session != null && entry != null) {
-            var timestamp = new Timestamp(Instant.now().toEpochMilli());
-            List<SensorLogEntry> sensorList = new ArrayList<>();
-            sensorList.add(latestEntry);
-            SensorLogEntry newLogEntry = StaticDeviceMessageQueue.dequeue();
+        if (entry != null) {
+            //var timestamp = new Timestamp(Instant.now().toEpochMilli());
+            //SensorLog sensorList = new ArrayList<>();
+            //sensorList.add(latestEntry);
+            //SensorLog newLogEntry = StaticDeviceMessageQueue.dequeue();
 
-            if (newLogEntry != null) {
-                latestEntry = newLogEntry;
-            }
+            //if (newLogEntry != null) {
+              //  latestEntry = newLogEntry;
+            //}
 
-            session.getBasicRemote().sendText(new Gson().toJson(sensorList));
+            session.getBasicRemote().sendText(new Gson().toJson(entry));
         }
     }
 
