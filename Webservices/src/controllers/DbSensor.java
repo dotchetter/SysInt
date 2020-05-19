@@ -40,6 +40,10 @@ abstract public class DbSensor extends HttpServlet
             return;
         }
 
+        //Remove decimals for compatibility with wordpress table
+        for (var entry : logEntries)
+            entry.setValue((int)entry.getValue());
+
         writer.print(new Gson().toJson(logEntries));
         writer.flush();
     }
