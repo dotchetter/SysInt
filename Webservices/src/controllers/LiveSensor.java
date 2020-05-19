@@ -22,34 +22,38 @@ abstract public class LiveSensor
     private static Thread threadForDeviceHandle = null;
     private static EmbeddedDeviceHandle deviceHandle = null;
     private static Properties properties = null;
+    private static Object lock = new Object();
 
     public LiveSensor() throws IOException, ClassNotFoundException
     {
     }
 
-    protected synchronized void onOpen(Session session, SensorType sensorType)
+    protected void onOpen(Session session, SensorType sensorType)
     {
-        if (properties == null)
+        synchronized(lock)
         {
-            try (var stream = new FileInputStream("db.properties"))
+            if (properties == null)
             {
-                properties = new Properties();
-                properties.load(stream);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-                return;
+                try (var stream = new FileInputStream("db.properties"))
+                {
+                    properties = new Properties();
+                    properties.load(stream);
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                    return;
+                }
             }
-        }
-        if (deviceHandle == null)
-        {
-            deviceHandle = new EmbeddedDeviceHandle(properties.getProperty("city"));
-        }
+            if (deviceHandle == null)
+            {
+                deviceHandle = new EmbeddedDeviceHandle(properties.getProperty("city"));
+            }
 
-        if (threadForDeviceHandle == null)
-        {
-            threadForDeviceHandle = new Thread(deviceHandle);
-            threadForDeviceHandle.start();
+            if (threadForDeviceHandle == null)
+            {
+                threadForDeviceHandle = new Thread(deviceHandle);
+                threadForDeviceHandle.start();
+            }
         }
 
         this.session = session;
@@ -71,7 +75,7 @@ abstract public class LiveSensor
         timer.scheduleAtFixedRate(timerTask, 0, 1000);
     }
 
-    private synchronized void sendData(SensorType sensorType) throws IOException, SQLException
+    private void sendData(SensorType sensorType) throws IOException, SQLException
     {
         var sensorLogEntry = deviceHandle.dequeue(sensorType);
         if (sensorLogEntry != null)
