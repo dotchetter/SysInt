@@ -36,19 +36,22 @@
     let tempws = new WebSocket("ws://localhost:8080/Webservices_war_exploded/live/temperature");
     tempws.onmessage = function(e)
     {
-      document.getElementById("liveTemperature").innerHTML = e.data;
+      let data = JSON.parse(e.data);
+      document.getElementById("liveTemperature").innerHTML = data.value + " * " + data.created;
     }
 
     let humidws = new WebSocket("ws://localhost:8080/Webservices_war_exploded/live/humidity");
     humidws.onmessage = function(e)
     {
-      document.getElementById("liveHumidity").innerHTML = e.data;
+      let data = JSON.parse(e.data);
+      document.getElementById("liveHumidity").innerHTML = data.value + " * " + data.created;;
     }
 
     let lumws = new WebSocket("ws://localhost:8080/Webservices_war_exploded/live/lumen");
     lumws.onmessage = function(e)
     {
-      document.getElementById("liveLumen").innerHTML = e.data;
+      let data = JSON.parse(e.data);
+      document.getElementById("liveLumen").innerHTML = data.value + " * " + data.created;;
     }
 
      fetch("http://localhost:8080/Webservices_war_exploded/db/temperature")
