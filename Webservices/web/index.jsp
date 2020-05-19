@@ -3,19 +3,19 @@
     <title></title>
   </head>
   <body>
+
   <h1>Realtidsdata</h1>
-  <div id="TEMPERATURE"></div>
-  <div id="HUMIDITY"></div>
-  <div id="LUMEN"></div>
+  <div id="temperature"></div>
+  <div id="humidity"></div>
+  <div id="lumen"></div>
   <h1>Databas</h1>
-  <div id="database"</body>
+  <div id="database"></div>
 
   <script>
-    let ws = new WebSocket("ws://localhost:8080/Webservices_war_exploded/SensorsRealTime");
+    let ws = new WebSocket("ws://localhost:8080/Webservices_war_exploded/live/temperature");
     ws.onmessage = function(e)
     {
-      let data = JSON.parse(e.data);
-      document.getElementById(data.sensorType).innerHTML = e.data;
+      document.getElementById("temperature").innerHTML = e.data;
     }
 
      fetch("http://localhost:8080/Webservices_war_exploded/SensorsDb")

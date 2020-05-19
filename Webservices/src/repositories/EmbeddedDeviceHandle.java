@@ -7,12 +7,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 public class EmbeddedDeviceHandle implements Runnable {
-    String deviceLocation;
+    private String deviceLocation;
+    private Map<SensorType, SensorLogEntryQueue> queues = new HashMap<>();;
 
     public EmbeddedDeviceHandle(String deviceLocation){
         this.deviceLocation = deviceLocation;
+        for (var sensorType : SensorType.values())
+            queues.put(sensorType, new SensorLogEntryQueue());
     }
 
     public void run() {
@@ -58,14 +65,14 @@ public class EmbeddedDeviceHandle implements Runnable {
                     Float humid = Float.valueOf(splitMsgbuf[1]);
                     Float light = Float.valueOf(splitMsgbuf[2]);
 
-                        Timestamp time = new Timestamp(Instant.now().toEpochMilli());
-                        SensorLog tempEntry = new SensorLog(SensorType.TEMPERATURE, new SensorLogEntry(temp, time, this.deviceLocation));
-                        SensorLog humidEntry = new SensorLog(SensorType.HUMIDITY, new SensorLogEntry(humid, time, this.deviceLocation));
-                        SensorLog lightEntry = new SensorLog(SensorType.LUMEN, new SensorLogEntry(light, time, this.deviceLocation));
+                    Timestamp time = new Timestamp(Instant.now().toEpochMilli());
+                    SensorLogEntry tempEntry = new SensorLogEntry(temp, time, this.deviceLocation);
+                    SensorLogEntry humidEntry = new SensorLogEntry(humid, time, this.deviceLocation);
+                    SensorLogEntry lightEntry = new SensorLogEntry(light, time, this.deviceLocation);
 
-                    StaticDeviceMessageQueue.enqueue(tempEntry);
-                    StaticDeviceMessageQueue.enqueue(humidEntry);
-                    StaticDeviceMessageQueue.enqueue(lightEntry);
+                    queues.get(SensorType.TEMPERATURE).enqueue(tempEntry);
+                    queues.get(SensorType.HUMIDITY).enqueue(humidEntry);
+                    queues.get(SensorType.LUMEN).enqueue(lightEntry);
                 } catch (Exception e) {
                     System.err.println("Could not enqueue log entries from parsed message: " + inBuf);
                     inBuf = "";
@@ -82,5 +89,10 @@ public class EmbeddedDeviceHandle implements Runnable {
             }
         }
         chosenPort.closePort();
+    }
+
+    public SensorLogEntry dequeue(SensorType sensorType)
+    {
+        return queues.get(sensorType).dequeue();
     }
 }

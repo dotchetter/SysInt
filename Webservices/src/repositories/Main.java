@@ -1,17 +1,15 @@
 package repositories;
 
-import repositories.SensorDAO;
-import models.SensorLog;
 import models.SensorLogEntry;
 import java.io.IOException;
 import java.sql.*;
-import java.time.Instant;
 
 public class Main {
 
     public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException
     {
         //write your test code here
+
         //SensorDAO dao = new SensorDAO();
 
 	    EmbeddedDeviceHandle deviceHandle = new EmbeddedDeviceHandle("Stockholm");
@@ -20,16 +18,12 @@ public class Main {
         threadForDeviceHandle.start();
 
         for (;;) {
-//            try {
-//                Thread.sleep(100);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-            SensorLog i = StaticDeviceMessageQueue.dequeue();
-            //System.out.println("Waiting");
-            if (i == null) {continue;}
-            SensorLogEntry entry = i.getEntries().get(0);
-            System.out.println(i.getSensorType() + " " + entry.getValue() + " " + entry.getCreated() + " " + entry.getCity());
+            for (var sensorType : SensorType.values())
+            {
+                SensorLogEntry i = deviceHandle.dequeue(sensorType);
+                if (i == null) { continue; }
+                System.out.println(sensorType + " " + i.getValue() + " " + i.getCreated() + " " + i.getCity());
+            }
         }
 
 /*
