@@ -70,9 +70,8 @@ public class EmbeddedDeviceHandle implements Runnable {
                     SensorLogEntry humidEntry = new SensorLogEntry(humid, time, this.deviceLocation);
                     SensorLogEntry lightEntry = new SensorLogEntry(light, time, this.deviceLocation);
 
-                    queues.get(SensorType.TEMPERATURE).enqueue(tempEntry);
-                    queues.get(SensorType.HUMIDITY).enqueue(humidEntry);
-                    queues.get(SensorType.LUMEN).enqueue(lightEntry);
+                    enqueue(tempEntry, humidEntry, lightEntry);
+
                 } catch (Exception e) {
                     System.err.println("Could not enqueue log entries from parsed message: " + inBuf);
                     inBuf = "";
@@ -91,7 +90,14 @@ public class EmbeddedDeviceHandle implements Runnable {
         chosenPort.closePort();
     }
 
-    public SensorLogEntry dequeue(SensorType sensorType)
+    private synchronized void enqueue(SensorLogEntry tempEntry, SensorLogEntry humidEntry, SensorLogEntry lightEntry)
+    {
+        queues.get(SensorType.TEMPERATURE).enqueue(tempEntry);
+        queues.get(SensorType.HUMIDITY).enqueue(humidEntry);
+        queues.get(SensorType.LUMEN).enqueue(lightEntry);
+    }
+
+    public synchronized SensorLogEntry dequeue(SensorType sensorType)
     {
         return queues.get(sensorType).dequeue();
     }

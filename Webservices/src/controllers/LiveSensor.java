@@ -14,16 +14,16 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SensorsRealTimeBase
+abstract public class LiveSensor
 {
-    protected SensorDAO sensorDao = new SensorDAO();
-    protected Session session = null;
-    protected Timer timer = new Timer();
-    protected static Thread threadForDeviceHandle = null;
-    protected static EmbeddedDeviceHandle deviceHandle = null;
-    protected static Properties properties = null;
+    private SensorDAO sensorDao = new SensorDAO();
+    private Session session = null;
+    private Timer timer = new Timer();
+    private static Thread threadForDeviceHandle = null;
+    private static EmbeddedDeviceHandle deviceHandle = null;
+    private static Properties properties = null;
 
-    protected SensorsRealTimeBase() throws IOException, ClassNotFoundException
+    public LiveSensor() throws IOException, ClassNotFoundException
     {
     }
 
@@ -71,7 +71,7 @@ public class SensorsRealTimeBase
         timer.scheduleAtFixedRate(timerTask, 0, 1000);
     }
 
-    public synchronized void sendData(SensorType sensorType) throws IOException, SQLException
+    private synchronized void sendData(SensorType sensorType) throws IOException, SQLException
     {
         var sensorLogEntry = deviceHandle.dequeue(sensorType);
         if (sensorLogEntry != null)
