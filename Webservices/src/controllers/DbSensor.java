@@ -2,7 +2,9 @@ package controllers;
 
 import com.google.gson.Gson;
 import models.SensorLog;
+import models.SensorLogEntry;
 import repositories.SensorDAO;
+import repositories.SensorType;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,11 +14,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet(name = "SensorsDb", urlPatterns = "/SensorsDb")
-public class SensorsDb extends HttpServlet
+abstract public class DbSensor extends HttpServlet
 {
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
+    protected void doGet(SensorType sensorType, HttpServletRequest request, HttpServletResponse response) throws IOException
     {
         SensorDAO sensorDao = null;
         try
@@ -30,17 +30,17 @@ public class SensorsDb extends HttpServlet
         setAccessControlHeaders(response);
         response.setContentType("application/json");
         var writer = response.getWriter();
-        List<SensorLog> sensorLogs = null;
+        List<SensorLogEntry> logEntries = null;
         try
         {
-            sensorLogs = sensorDao.getAllLogs(1000);
+            logEntries = sensorDao.getLog(sensorType, 1000).getEntries();
         } catch (SQLException e)
         {
             e.printStackTrace();
             return;
         }
 
-        writer.print(new Gson().toJson(sensorLogs));
+        writer.print(new Gson().toJson(logEntries));
         writer.flush();
     }
 

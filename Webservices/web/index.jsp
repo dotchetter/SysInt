@@ -4,45 +4,64 @@
   </head>
   <body>
 
-  <h1>Realtidsdata</h1>
+  <h1>Live</h1>
   <div>
     <p>Temperature</p>
-    <p id="temperature"></p>
+    <p id="liveTemperature"></p>
   </div>
   <div>
     <p>Humidity</p>
-    <p id="humidity"></p>
+    <p id="liveHumidity"></p>
   </div>
   <div>
     <p>Lumen</p>
-    <p id="lumen"></p>
+    <p id="liveLumen"></p>
   </div>
-  <h1>Databas</h1>
-  <div id="database"></div>
+  <h1>Db</h1>
+  <table>
+    <tr>
+      <th>Temperature</th>
+      <th>Humidity</th>
+      <th>Lumen</th>
+    </tr>
+    <tr>
+      <td id = "dbTemperature"></td>
+      <td id = "dbHumidity"></td>
+      <td id = "dbLumen"></td>
+    </tr>
+  </table>
 
   <script>
 
     let tempws = new WebSocket("ws://localhost:8080/Webservices_war_exploded/live/temperature");
     tempws.onmessage = function(e)
     {
-      document.getElementById("temperature").innerHTML = e.data;
+      document.getElementById("liveTemperature").innerHTML = e.data;
     }
 
     let humidws = new WebSocket("ws://localhost:8080/Webservices_war_exploded/live/humidity");
     humidws.onmessage = function(e)
     {
-      document.getElementById("humidity").innerHTML = e.data;
+      document.getElementById("liveHumidity").innerHTML = e.data;
     }
 
     let lumws = new WebSocket("ws://localhost:8080/Webservices_war_exploded/live/lumen");
     lumws.onmessage = function(e)
     {
-      document.getElementById("lumen").innerHTML = e.data;
+      document.getElementById("liveLumen").innerHTML = e.data;
     }
 
-     fetch("http://localhost:8080/Webservices_war_exploded/SensorsDb")
+     fetch("http://localhost:8080/Webservices_war_exploded/db/temperature")
              .then(response => response.text())
-             .then(data => document.getElementById("database").innerHTML = data);
+             .then(data => document.getElementById("dbTemperature").innerHTML = data);
+
+    fetch("http://localhost:8080/Webservices_war_exploded/db/humidity")
+            .then(response => response.text())
+            .then(data => document.getElementById("dbHumidity").innerHTML = data);
+
+    fetch("http://localhost:8080/Webservices_war_exploded/db/lumen")
+            .then(response => response.text())
+            .then(data => document.getElementById("dbLumen").innerHTML = data);
 
   </script>
   </body>
